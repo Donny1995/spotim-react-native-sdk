@@ -47,10 +47,34 @@ BOOL defaultNavBarVisibilityHidden;
     [self initPreConversationControlle];
 }
 
+- (UIViewController *)findDeepestViewController:(UIViewController *)controller {
+    if ([controller isKindOfClass: UINavigationController.class]) {
+        UINavigationController * navigation = (UINavigationController *) controller;
+        if (navigation.topViewController == NULL) {
+            return controller;
+        } else {
+            return [self findDeepestViewController: navigation.topViewController];
+        }
+    } else if ([controller isKindOfClass: UITabBarController.class]) {
+        UITabBarController * tab = (UITabBarController *) controller;
+        if (tab.selectedViewController == NULL) {
+            return controller;
+        } else {
+            return [self findDeepestViewController: tab.selectedViewController];
+        }
+    } else {
+        if (controller.presentedViewController == NULL) {
+            return controller;
+        } else {
+            return [self findDeepestViewController: controller.presentedViewController];
+        }
+    }
+}
+
 - (void)initPreConversationControlle
 {
     UINavigationController *navController = (UINavigationController *)[UIApplication sharedApplication].keyWindow.rootViewController;
-    UIViewController *rootViewController = navController.topViewController;
+    UIViewController *rootViewController = [self findDeepestViewController: navController];
 
     appRootViewController = rootViewController;
     defaultNavBarVisibilityHidden = navController.navigationBar.isHidden;
